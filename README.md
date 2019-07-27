@@ -1,2 +1,2 @@
-# PetriNet-CPU-Simulator
-CPU Simulator based on petri nets using 2 cores and its generalized equation.
+#dual-core processor using petri net
+A dual-core processor simulator implemented using petri net and its generalized equation 
