@@ -53,7 +53,7 @@ public class TransitionInvariant {
         System.out.println("Disparos restantes luego de remover los tinv:");
         for (int i :
                 disparos) {
-            System.out.println(i);
+            System.out.print(i + " ");
         }
 
     }
