@@ -2,7 +2,6 @@ package main;
 
 import hilo.HiloAutomatico;
 import hilo.HiloGenerador;
-import hilo.HiloTemporizado;
 
 import java.io.IOException;
 

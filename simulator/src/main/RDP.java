@@ -4,46 +4,35 @@ import java.io.*;
 import java.util.Arrays;
 
 
-public class RDP {
+class RDP {
 
     private final int numeroPlazas = 16;
     private final int numeroTransiciones = 15;
 
-    //n x m (plazas x transiciones)
     private int[][] incidencia;
-    //n x m (plazas x transiciones)
     private int[][] incidenciaPre;
-    //n x m (plazas x transiciones)
     private int[][] inhibicion;
-    //n filas (plazas)
+
     private int[] marcadoActual;
-    //m columnas (transiciones)
+
     private int[] sensibilizado;
-    //m columnas (transiciones)
     private int[] desensibilizadasInhibidor;
-    //m columnas (transiciones)
     private int[] desensibilizadasTiempo;
-    //m columnas (transiciones)
     private int[] sensibilizadoExtendido;
-    //m x 2 filas(transiciones x 2)
+
     private int[][] intervalos;
-    //m columnas (transiciones)
-    private long[] timeStamp;
-    private boolean[] temporizadas;
+    private final long[] timeStamp;
+    private final boolean[] temporizadas;
+
     private int nucleo1;
     private int nucleo2;
-    private Buffer buffer1;
-    private Buffer buffer2;
-    private LogFileManager log;
+
+    private final Buffer buffer1;
+    private final Buffer buffer2;
+    private final LogFileManager log;
 
 
     public RDP(LogFileManager log, Buffer buffer1, Buffer buffer2) throws IOException {
-        cargarMatrizIncidencia("Matriz de incidencia.txt", numeroPlazas, numeroTransiciones);
-        cargarMatrizIncidenciaPre("Matriz incidencia pre.txt", numeroPlazas, numeroTransiciones);
-        cargarMatrizInhibicion("Matriz de inhibicion.txt", numeroPlazas, numeroTransiciones);
-        cargarMarcadoInicial("Marcado inicial.txt", numeroPlazas);
-        cargarIntervalosTemporales("Intervalos temporales.txt", numeroTransiciones);
-
 
         temporizadas = new boolean[numeroTransiciones];
         sensibilizado = new int[numeroTransiciones];//numero de transiciones
@@ -58,7 +47,7 @@ public class RDP {
         calcularTranSens();
         setTimeStamp();
         //calcularDesensibilizadasTiempo();
-       // calcularSensibilizadoExtendido();
+        // calcularSensibilizadoExtendido();
 
         this.buffer1 = buffer1;
         this.buffer2 = buffer2;
@@ -84,12 +73,10 @@ public class RDP {
             log.escribirDatos(datosArchivo(transicion.getValor()));
             return true;
         }
-//        if(nucleo1 + nucleo2 == 1000)
-//            System.exit(0);
         return false;
     }
 
-    public void calcularTranSens() {
+    private void calcularTranSens() {
 
         /*int[] vectorE = new int[numeroTransiciones];
         Arrays.fill(vectorE, 1);
@@ -110,59 +97,62 @@ public class RDP {
          */
         Arrays.fill(sensibilizado, 0);
 
-        for(int i=0; i<numeroTransiciones; i++){
-            if(transicionSens(i)){
+        for (int i = 0; i < numeroTransiciones; i++) {
+            if (transicionSens(i)) {
                 sensibilizado[i] = 1;
             }
         }
     }
-    public void calcularDesensibilizadasInhibidor(){
+
+    private void calcularDesensibilizadasInhibidor() {
         int[] vectorQ = new int[numeroPlazas];
         Arrays.fill(vectorQ, 0);
         Arrays.fill(desensibilizadasInhibidor, 0);
 
-        for(int i=0; i< numeroPlazas; i++){
-            if(marcadoActual[i] > 0)
+        for (int i = 0; i < numeroPlazas; i++) {
+            if (marcadoActual[i] > 0)
                 vectorQ[i] = 1;
         }
 
-        for(int j=0; j< numeroTransiciones; j++){
-            for(int k=0; k<numeroPlazas; k++) {
+        for (int j = 0; j < numeroTransiciones; j++) {
+            for (int k = 0; k < numeroPlazas; k++) {
                 desensibilizadasInhibidor[j] += vectorQ[k] * inhibicion[k][j];
             }
         }
 
-        for(int k=0; k<numeroTransiciones; k++){
-            if(desensibilizadasInhibidor[k]==0)
-                desensibilizadasInhibidor[k]=1;
-            else desensibilizadasInhibidor[k]=0;
+        for (int k = 0; k < numeroTransiciones; k++) {
+            if (desensibilizadasInhibidor[k] == 0)
+                desensibilizadasInhibidor[k] = 1;
+            else desensibilizadasInhibidor[k] = 0;
         }
     }
 
-    private void calcularDesensibilizadasTiempo(){
-        Arrays.fill(desensibilizadasTiempo,1);
+    private void calcularDesensibilizadasTiempo() {
+        Arrays.fill(desensibilizadasTiempo, 1);
 
-        for(int i= 0; i<numeroTransiciones; i++){
-           if(temporizadas[i]) { //Se fija si se cumplio el tiempo solo si la transicion es temporizada
-               if (!testVentanaTiempo(i)) {
-                   desensibilizadasTiempo[i] = 0;
-               }
-           }
+        for (int i = 0; i < numeroTransiciones; i++) {
+            if (temporizadas[i]) { //Se fija si se cumplio el tiempo solo si la transicion es temporizada
+                if (!testVentanaTiempo(i)) {
+                    desensibilizadasTiempo[i] = 0;
+                }
+            }
         }
     }
 
-    private void calcularSensibilizadoExtendido(){
+    private void calcularSensibilizadoExtendido() {
         calcularDesensibilizadasTiempo();
 
-        for(int i=0; i<numeroTransiciones; i++){
-            if(sensibilizado[i]==1 && desensibilizadasInhibidor[i]==1 && desensibilizadasTiempo[i]==1)
-                sensibilizadoExtendido[i]=1;
-            else sensibilizadoExtendido[i]=0;
+        for (int i = 0; i < numeroTransiciones; i++) {
+            if (sensibilizado[i] == 1 && desensibilizadasInhibidor[i] == 1 && desensibilizadasTiempo[i] == 1)
+                sensibilizadoExtendido[i] = 1;
+            else sensibilizadoExtendido[i] = 0;
         }
     }
 
 
-    public int[] sensibilizadas() {return sensibilizadoExtendido;}
+    public int[] sensibilizadas() {
+        return sensibilizadoExtendido;
+    }
 
     /*
      * @return true si la transicion esta sensibilizada, no esta inhibida por un arco inhibidor
@@ -170,7 +160,7 @@ public class RDP {
      */
     private boolean estaSensibilizada(Transicion transicion) {
         calcularSensibilizadoExtendido();
-        return sensibilizadoExtendido[transicion.getValor()]==1;
+        return sensibilizadoExtendido[transicion.getValor()] == 1;
     }
 
     private void setMarcadoActual(Transicion transicion) {
@@ -190,27 +180,27 @@ public class RDP {
         }
         return true;
     }
+
     /*
      * @return true si transcurrio el tiempo de dura el disparo de la transicion?
      */
-    private boolean testVentanaTiempo(int transicion){
-        if(System.currentTimeMillis() - timeStamp[transicion] < intervalos[transicion][0]){
-            return false;
-        }
-        return  true;
+    private boolean testVentanaTiempo(int transicion) {
+        return System.currentTimeMillis() - timeStamp[transicion] >= intervalos[transicion][0];
     }
+
     /*
      *Setea el comienzo del tiempo de sensibilizado de una transicion
      */
-    private void setTimeStamp(){
-        for(int i=0; i < numeroTransiciones; i++){
-            if(sensibilizado[i] == 1 && desensibilizadasInhibidor[i]==1){
-                if(timeStamp[i]==0)
+    private void setTimeStamp() {
+        for (int i = 0; i < numeroTransiciones; i++) {
+            if (sensibilizado[i] == 1 && desensibilizadasInhibidor[i] == 1) {
+                if (timeStamp[i] == 0)
                     timeStamp[i] = System.currentTimeMillis();
-            }else timeStamp[i] = 0;
+            } else timeStamp[i] = 0;
         }
         calcularSensibilizadoExtendido();
     }
+
     private void checkProcesados(Transicion transicion) {
 
         switch (transicion) {
@@ -222,6 +212,7 @@ public class RDP {
                 break;
         }
     }
+
     @SuppressWarnings("incomplete-switch")
     private void modificarBuffer(Transicion transicion) {
 
@@ -241,21 +232,21 @@ public class RDP {
         }
     }
 
-    public String datosArchivo(int transicion){
-        return  "disparo=" + transicion +
+    private void setTemporizadas() {
+        for (Transicion transicion : Transicion.values()) {
+            temporizadas[transicion.getValor()] = transicion.esTemporizada();
+        }
+    }
+
+    private String datosArchivo(int transicion) {
+        return "disparo=" + transicion +
                 "\nmarcado=" + Arrays.toString(marcadoActual) +
                 "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido);
     }
 
-    public String datosArchivo(){
-        return  "marcado=" + Arrays.toString(marcadoActual) +
+    private String datosArchivo() {
+        return "marcado=" + Arrays.toString(marcadoActual) +
                 "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido);
-    }
-
-    private void setTemporizadas(){
-        for(Transicion transicion: Transicion.values()){
-            temporizadas[transicion.getValor()] = transicion.esTemporizada();
-        }
     }
 
     @Override
@@ -269,173 +260,39 @@ public class RDP {
                 "\n, tareas en buffer 2 =" + marcadoActual[9] +
                 "\n, tareas en nucleo 1 =" + nucleo1 +
                 "\n, tareas en nucleo 2 =" + nucleo2 +
-                "\n, Invariantes M(P0)+M(P1)=" + marcadoActual[0] +"+" +marcadoActual[1] +"= 1"+
-                "\n, Invariantes M(P10)+M(P11) = " + marcadoActual[10] +"+" +marcadoActual[11] +"=1"+
-                "\n, Invariantes M(P12)+M(P13)+M(P15)=" + marcadoActual[12] +"+" +marcadoActual[13] +"+" +marcadoActual[15] +"=1"+
-                "\n, Invariantes M(P5)+M(P7)+M(P8)=" + marcadoActual[5] +"+" +marcadoActual[7] +"+" +marcadoActual[8] +"=1"+
-                "\n, Invariantes M(P3)+M(P4)=" + marcadoActual[3] +"+" +marcadoActual[4] +"=1 "+
+                "\n, Invariantes M(P0)+M(P1)=" + marcadoActual[0] + "+" + marcadoActual[1] + "= 1" +
+                "\n, Invariantes M(P10)+M(P11) = " + marcadoActual[10] + "+" + marcadoActual[11] + "=1" +
+                "\n, Invariantes M(P12)+M(P13)+M(P15)=" + marcadoActual[12] + "+" + marcadoActual[13] + "+" + marcadoActual[15] + "=1" +
+                "\n, Invariantes M(P5)+M(P7)+M(P8)=" + marcadoActual[5] + "+" + marcadoActual[7] + "+" + marcadoActual[8] + "=1" +
+                "\n, Invariantes M(P3)+M(P4)=" + marcadoActual[3] + "+" + marcadoActual[4] + "=1 " +
                 '}';
     }
 
+    private int[][] cargarMatriz(String dir, int fila, int columna) {
 
-    /*
-     *   METODOS PARA CARGAR LOS ARCHIVOS
-     *
-     * */
-    private void cargarMarcadoInicial(String file_name, int numeroPlazas) {
-
-        marcadoActual = new int[numeroPlazas];
+        int[][] matriz = new int[fila][columna];
 
         try {
 
-            FileInputStream fstream = new FileInputStream(file_name);
+            FileInputStream fstream = new FileInputStream(dir);
             DataInputStream entrada = new DataInputStream(fstream);
             BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
 
             String strLinea;
 
-            while ((strLinea = buffer.readLine()) != null) {
+            for (int i = 0; (strLinea = buffer.readLine()) != null ; i++) {
                 String[] linea = strLinea.split(",");
-                for (int j = 0; j < numeroPlazas; j++) {
-                    marcadoActual[j] = Integer.parseInt(linea[j]);
+                for (int j = 0; j < columna; i++) {
+                    intervalos[i][j] = Integer.parseInt(linea[j]);
                 }
             }
 
             entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
 
-    private void cargarMatrizIncidencia(String file_name, int numeroPlazas, int numeroTransiciones) {
-
-        incidencia = new int[numeroPlazas][numeroTransiciones];
-
-        try {
-
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
-
-            String strLinea;
-
-            int j = 0;
-
-            int pos;
-            while ((strLinea = buffer.readLine()) != null) {
-                String[] linea = strLinea.split(",");
-                pos = 0;
-                for (int i = 0; i < numeroTransiciones; i++) {
-                    incidencia[j][pos] = Integer.parseInt(linea[pos]);
-                    pos++;
-                }
-                j++;
-            }
-
-            entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private void cargarMatrizIncidenciaPre(String file_name, int numeroPlazas, int numeroTransiciones) {
-
-        incidenciaPre = new int[numeroPlazas][numeroTransiciones];
-
-        try {
-
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
-
-            String strLinea;
-
-            int j = 0;
-
-            int pos;
-            while ((strLinea = buffer.readLine()) != null) {
-                String[] linea = strLinea.split(",");
-                pos = 0;
-                for (int i = 0; i < numeroTransiciones; i++) {
-                    incidenciaPre[j][pos] = Integer.parseInt(linea[pos]);
-                    pos++;
-                }
-                j++;
-            }
-
-            entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private void cargarMatrizInhibicion(String file_name, int numeroPlazas, int numeroTransiciones) {
-
-        inhibicion = new int[numeroPlazas][numeroTransiciones];
-
-        try {
-
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
-
-            String strLinea;
-
-            int j = 0;
-
-            int pos;
-            while ((strLinea = buffer.readLine()) != null) {
-                String[] linea = strLinea.split(",");
-                pos = 0;
-                for (int i = 0; i < numeroTransiciones; i++) {
-                    inhibicion[j][pos] = Integer.parseInt(linea[pos]);
-                    pos++;
-                }
-                j++;
-            }
-
-            entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private void cargarIntervalosTemporales(String file_name, int numeroTransiciones) {
-
-        intervalos = new int[numeroTransiciones][2];
-
-        try {
-
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
-
-            String strLinea;
-
-            int j = 0;
-
-            int pos;
-            while ((strLinea = buffer.readLine()) != null) {
-                String[] linea = strLinea.split(",");
-                pos = 0;
-                for (int i = 0; i < 2; i++) {
-                    intervalos[j][pos] = Integer.parseInt(linea[pos]);
-                    pos++;
-                }
-                j++;
-            }
-
-            entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return matriz;
     }
 
 
