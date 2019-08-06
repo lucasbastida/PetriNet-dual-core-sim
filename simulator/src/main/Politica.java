@@ -7,11 +7,11 @@ public class Politica {
     //a mayor val mayor prioridad
     private int[] politica;
 
-    Politica(){
+    Politica() {
         politica = new int[Monitor.numeroTransiciones];
 
         for (int i = 0; i < politica.length; i++) {
-            politica[i] = ThreadLocalRandom.current().nextInt(0,200);
+            politica[i] = ThreadLocalRandom.current().nextInt(0, 200);
         }
     }
 
@@ -38,4 +38,9 @@ public class Politica {
         return transicion;
     }
 
+    public Transicion elegirBuffer(Buffer buffer1, Buffer buffer2) {
+        if (buffer1.getEstado() > buffer2.getEstado()) {
+            return Transicion.TAREA_A_BUFFER_2;
+        } else return Transicion.TAREA_A_BUFFER_1;
+    }
 }
