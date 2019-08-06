@@ -22,7 +22,6 @@ public class HiloGenerador implements Runnable {
                 if (monitor.dispararTransicion(transicion)) {
                     tareas++;
                     System.out.println("#################################################################################################################" + tareas);
-                    //Thread.sleep(10);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
