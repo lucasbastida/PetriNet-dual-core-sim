@@ -238,12 +238,20 @@ public class RDP {
     public String datosArchivo(int transicion) {
         return "disparo=" + transicion +
                 "\nmarcado=" + Arrays.toString(marcadoActual) +
-                "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido);
+                "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
+                "\nbuffer1=" + marcadoActual[2] +
+                "\nbuffer2=" + marcadoActual[12] +
+                "\ntotalProcesadas1 =" + nucleo1 +
+                "\ntotalProcesadas2 =" + nucleo2;
     }
 
     public String datosArchivo() {
         return "marcado=" + Arrays.toString(marcadoActual) +
-                "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido);
+                "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
+                "\nbuffer1=" + marcadoActual[2] +
+                "\nbuffer2=" + marcadoActual[12] +
+                "\ntotalProcesadas1 =" + nucleo1 +
+                "\ntotalProcesadas2 =" + nucleo2;
     }
 
     @Override
