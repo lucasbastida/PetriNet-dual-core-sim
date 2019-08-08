@@ -5,8 +5,8 @@ import java.util.concurrent.Semaphore;
 
 public class Monitor {
 
-    public static final int numeroTransiciones = 21;
-    public static final int numeroPlazas = 22;
+    public static final int numeroTransiciones = 15;
+    public static final int numeroPlazas = 16;
 
     private Semaphore mutex = new Semaphore(1, true);
     private RDP rdp;
@@ -64,12 +64,10 @@ public class Monitor {
         return 0;
     }
 
-    private boolean noEncolar(Transicion transicion) {
-        if (transicion == Transicion.GENERAR_TAREA
-                || transicion == Transicion.PROCESANDO_EN_NUCLEO_1 || transicion == Transicion.PROCESANDO_EN_NUCLEO_2
-                || transicion == Transicion.T7 || transicion == Transicion.T17
-                || transicion == Transicion.T9 || transicion == Transicion.T19)
-            return true;
+    private boolean noEncolar(Transicion transicion){
+        if(transicion == Transicion.GENERAR_TAREA || transicion == Transicion.T4 || transicion == Transicion.T10
+                || transicion == Transicion.PROCESANDO_EN_NUCLEO_1 || transicion == Transicion.PROCESANDO_EN_NUCLEO_2)
+            return  true;
         return false;
     }
 }

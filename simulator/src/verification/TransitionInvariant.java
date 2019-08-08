@@ -8,16 +8,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class TransitionInvariant {
     public static void main(String[] args) {
 
         LinkedList<Integer> disparos = new LinkedList<>();
         readDisparos(disparos, "log.txt");
 
-        int tinv[][] = {{0, 1, 5, 6, 7, 8, 9},
-                {0, 1, 2, 3, 4, 7, 8, 9, 10},
-                {0, 11, 15, 16, 17, 18, 19},
-                {0, 11, 12, 13, 14, 17, 18, 19, 20}};
+        int tinv[][] = {{0, 10, 11, 12, 14, 2, 9},
+                {0, 10, 13, 2, 9},
+                {0, 1, 3, 4, 6},
+                {0, 1, 3, 4, 5, 7, 8}};
 
         System.out.println("Todos los disparos realizados:");
         for (int i :
