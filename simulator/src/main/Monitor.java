@@ -5,27 +5,24 @@ import java.util.concurrent.Semaphore;
 
 public class Monitor {
 
-    public static final int numeroTransiciones = 15;
-    public static final int numeroPlazas = 16;
+    private static final int numeroTransiciones = 15;
+    private static final int numeroPlazas = 16;
 
-    private Semaphore mutex = new Semaphore(1, true);
-    private RDP rdp;
-    private Politica politica = new Politica();
-    private Colas colas = new Colas(numeroTransiciones);
     private Buffer buffer1 = new Buffer();
     private Buffer buffer2 = new Buffer();
 
+    private Semaphore mutex = new Semaphore(1, true);
+    private Colas colas = new Colas(numeroTransiciones);
+    private Politica politica = new Politica(buffer1, buffer2, numeroTransiciones);
+    private RDP rdp;
+
     public Monitor(LogFileManager log) throws IOException {
-        this.rdp = new RDP(log, buffer1, buffer2);
+        this.rdp = new RDP(log, buffer1, buffer2, numeroPlazas, numeroTransiciones);
     }
 
     public boolean dispararTransicion(Transicion transicion) throws InterruptedException, IOException {
 
         mutex.acquire();
-
-        if (transicion == Transicion.TAREA_A_BUFFER_1 || transicion == Transicion.TAREA_A_BUFFER_2) {
-            transicion = politica.elegirBuffer(buffer1, buffer2);
-        }
 
         while (!rdp.disparar(transicion)) {
 
