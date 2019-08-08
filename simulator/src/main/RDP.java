@@ -6,11 +6,12 @@ import java.util.Arrays;
 
 public class RDP {
 
-    private final int numeroPlazas = 22;
-    private final int numeroTransiciones = 21;
+    private final int numeroPlazas = 16;
+    private final int numeroTransiciones = 15;
 
     //n x m (plazas x transiciones)
-    private int[][] incidencia;
+    private int[][] incidenciaPre;
+    private int[][] incidenciaPos;
     private int[][] inhibicion;
     //n filas (plazas)
     private int[] marcadoActual;
@@ -33,10 +34,12 @@ public class RDP {
 
 
     public RDP(LogFileManager log, Buffer buffer1, Buffer buffer2) throws IOException {
-        cargarMatrizIncidencia("Matriz de incidencia.txt", numeroPlazas, numeroTransiciones);
-        cargarMatrizInhibicion("Matriz de inhibicion.txt", numeroPlazas, numeroTransiciones);
+
+        incidenciaPre = cargarMatriz("Matriz incidencia pre.txt", numeroPlazas, numeroTransiciones);
+        incidenciaPos = cargarMatriz("Matriz incidencia pos.txt", numeroPlazas, numeroTransiciones);
+        inhibicion = cargarMatriz("Matriz de inhibicion.txt", numeroPlazas, numeroTransiciones);
+        intervalos = cargarMatriz("Intervalos temporales.txt", numeroTransiciones, 2);
         cargarMarcadoInicial("Marcado inicial.txt", numeroPlazas);
-        cargarIntervalosTemporales("Intervalos temporales.txt", numeroTransiciones);
 
 
         sensibilizado = new int[numeroTransiciones];//numero de transiciones
@@ -65,7 +68,7 @@ public class RDP {
             setMarcadoActual(transicion);
 
             //si se disparo una temporizada, reset a 0
-            if (transicion.esTemporizada()){
+            if (transicion.esTemporizada()) {
                 timeStamp[transicion.getValor()] = 0;
             }
 
@@ -104,7 +107,7 @@ public class RDP {
         for (int i = 0; i < numeroTransiciones; i++) {
             int[] vectorSi = new int[numeroPlazas];
             for (int j = 0; j < numeroPlazas; j++) {
-                vectorSi[j] = marcadoActual[j] + incidencia[j][i];
+                vectorSi[j] = marcadoActual[j] - incidenciaPre[j][i];
             }
 
             for (int j = 0; j < vectorSi.length; j++) {
@@ -114,7 +117,6 @@ public class RDP {
             }
         }
         sensibilizado = vectorE;
-
     }
 
     public void calcularDesensibilizadasInhibidor() {
@@ -175,8 +177,8 @@ public class RDP {
     }
 
     /*
-    * sets boolean array indicating which transitions are timed.
-    * */
+     * sets boolean array indicating which transitions are timed.
+     * */
     private void setTemporizadas() {
         for (Transicion transicion : Transicion.values()) {
             temporizadas[transicion.getValor()] = transicion.esTemporizada();
@@ -188,7 +190,8 @@ public class RDP {
 
         int[] nuevoMarcado = new int[numeroPlazas];
         for (int i = 0; i < nuevoMarcado.length; i++) {
-            nuevoMarcado[i] = marcadoActual[i] + incidencia[i][transicion.getValor()];
+            nuevoMarcado[i] = marcadoActual[i] +
+                    incidenciaPos[i][transicion.getValor()] - incidenciaPre[i][transicion.getValor()];
         }
         marcadoActual = nuevoMarcado;
     }
@@ -208,10 +211,10 @@ public class RDP {
 
     private void checkProcesados(Transicion transicion) {
         switch (transicion) {
-            case T9:
+            case T4:
                 nucleo1++;
                 break;
-            case T19:
+            case T10:
                 nucleo2++;
                 break;
         }
@@ -223,13 +226,13 @@ public class RDP {
             case TAREA_A_BUFFER_1:
                 buffer1.add(new Object());
                 break;
-            case T9:
+            case T4:
                 buffer1.remove();
                 break;
             case TAREA_A_BUFFER_2:
                 buffer2.add(new Object());
                 break;
-            case T19:
+            case T10:
                 buffer2.remove();
                 break;
         }
@@ -240,7 +243,7 @@ public class RDP {
                 "\nmarcado=" + Arrays.toString(marcadoActual) +
                 "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
                 "\nbuffer1=" + marcadoActual[2] +
-                "\nbuffer2=" + marcadoActual[12] +
+                "\nbuffer2=" + marcadoActual[9] +
                 "\ntotalProcesadas1 =" + nucleo1 +
                 "\ntotalProcesadas2 =" + nucleo2;
     }
@@ -249,7 +252,7 @@ public class RDP {
         return "marcado=" + Arrays.toString(marcadoActual) +
                 "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
                 "\nbuffer1=" + marcadoActual[2] +
-                "\nbuffer2=" + marcadoActual[12] +
+                "\nbuffer2=" + marcadoActual[9] +
                 "\ntotalProcesadas1 =" + nucleo1 +
                 "\ntotalProcesadas2 =" + nucleo2;
     }
@@ -263,14 +266,14 @@ public class RDP {
                 "\n, desensibilizada por tiempo=" + Arrays.toString(desensibilizadasTiempo) +
                 "\n, sensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
                 "\n, tareas en buffer 1 =" + marcadoActual[2] +
-                "\n, tareas en buffer 2 =" + marcadoActual[12] +
+                "\n, tareas en buffer 2 =" + marcadoActual[9] +
                 "\n, tareas finalizadas en nucleo 1 =" + nucleo1 +
                 "\n, tareas finalizadas en nucleo 2 =" + nucleo2 +
-//                "\n, Invariantes M(P0)+M(P1)=" + marcadoActual[0] + "+" + marcadoActual[1] + "= 1" +
-//                "\n, Invariantes M(P10)+M(P11) = " + marcadoActual[10] + "+" + marcadoActual[11] + "=1" +
-//                "\n, Invariantes M(P12)+M(P13)+M(P15)=" + marcadoActual[12] + "+" + marcadoActual[13] + "+" + marcadoActual[15] + "=1" +
-//                "\n, Invariantes M(P5)+M(P7)+M(P8)=" + marcadoActual[5] + "+" + marcadoActual[7] + "+" + marcadoActual[8] + "=1" +
-//                "\n, Invariantes M(P3)+M(P4)=" + marcadoActual[3] + "+" + marcadoActual[4] + "=1 " +
+                "\n, Invariantes M(P0)+M(P1)=" + marcadoActual[0] + "+" + marcadoActual[1] + "= 1" +
+                "\n, Invariantes M(P10)+M(P11) = " + marcadoActual[10] + "+" + marcadoActual[11] + "=1" +
+                "\n, Invariantes M(P12)+M(P13)+M(P15)=" + marcadoActual[12] + "+" + marcadoActual[13] + "+" + marcadoActual[15] + "=1" +
+                "\n, Invariantes M(P5)+M(P7)+M(P8)=" + marcadoActual[5] + "+" + marcadoActual[7] + "+" + marcadoActual[8] + "=1" +
+                "\n, Invariantes M(P3)+M(P4)=" + marcadoActual[3] + "+" + marcadoActual[4] + "=1 " +
                 "\n}";
     }
 
@@ -298,16 +301,14 @@ public class RDP {
             }
 
             entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void cargarMatrizIncidencia(String file_name, int numeroPlazas, int numeroTransiciones) {
+    private int[][] cargarMatriz(String file_name, int numeroFilas, int numeroColumnas) {
 
-        incidencia = new int[numeroPlazas][numeroTransiciones];
+        int[][] matriz = new int[numeroFilas][numeroColumnas];
 
         try {
 
@@ -317,92 +318,17 @@ public class RDP {
 
             String strLinea;
 
-            int j = 0;
-
-            int pos;
-            while ((strLinea = buffer.readLine()) != null) {
+            for (int fila = 0; (strLinea = buffer.readLine()) != null; fila++) {
                 String[] linea = strLinea.split(",");
-                pos = 0;
-                for (int i = 0; i < numeroTransiciones; i++) {
-                    incidencia[j][pos] = Integer.parseInt(linea[pos]);
-                    pos++;
+                for (int columna = 0; columna < numeroColumnas; columna++) {
+                    matriz[fila][columna] = Integer.parseInt(linea[columna]);
                 }
-                j++;
             }
 
             entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return matriz;
     }
-
-    private void cargarMatrizInhibicion(String file_name, int numeroPlazas, int numeroTransiciones) {
-
-        inhibicion = new int[numeroPlazas][numeroTransiciones];
-
-        try {
-
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
-
-            String strLinea;
-
-            int j = 0;
-
-            int pos;
-            while ((strLinea = buffer.readLine()) != null) {
-                String[] linea = strLinea.split(",");
-                pos = 0;
-                for (int i = 0; i < numeroTransiciones; i++) {
-                    inhibicion[j][pos] = Integer.parseInt(linea[pos]);
-                    pos++;
-                }
-                j++;
-            }
-
-            entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void cargarIntervalosTemporales(String file_name, int numeroTransiciones) {
-
-        intervalos = new int[numeroTransiciones][2];
-
-        try {
-
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
-
-            String strLinea;
-
-            int j = 0;
-
-            int pos;
-            while ((strLinea = buffer.readLine()) != null) {
-                String[] linea = strLinea.split(",");
-                pos = 0;
-                for (int i = 0; i < 2; i++) {
-                    intervalos[j][pos] = Integer.parseInt(linea[pos]);
-                    pos++;
-                }
-                j++;
-            }
-
-            entrada.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
 }
