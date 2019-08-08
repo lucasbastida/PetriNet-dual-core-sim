@@ -2,6 +2,7 @@ package main;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 
 public class RDP {
@@ -25,6 +26,7 @@ public class RDP {
     private long[] timeStamp;
     private boolean[] temporizadas;
     private int[][] intervalos;     //m x 2 filas(transiciones x 2)
+    public long[] sleepAmount;
 
     private int nucleo1;
     private int nucleo2;
@@ -51,6 +53,7 @@ public class RDP {
 
         timeStamp = new long[numeroTransiciones];
         temporizadas = new boolean[numeroTransiciones];
+        sleepAmount = new long[numeroTransiciones];
 
         setTemporizadas();
         Arrays.fill(timeStamp, 0);
@@ -67,6 +70,7 @@ public class RDP {
     public boolean disparar(Transicion transicion) throws IOException {
 
         if (estaSensibilizada(transicion)) {
+            //actualizar marcado
             setMarcadoActual(transicion);
 
             //si se disparo una temporizada, reset a 0
@@ -74,7 +78,8 @@ public class RDP {
                 timeStamp[transicion.getValor()] = 0;
             }
 
-            calcularSensibilizadoExtendido();//cuando dispara actualiza nuevo sensibilizado extendido
+            //cuando dispara actualiza nuevo sensibilizado extendido
+            calcularSensibilizadoExtendido();
 
             //accion realizada al disparar una transicion
             modificarBuffer(transicion);
@@ -160,7 +165,9 @@ public class RDP {
      * @return true si transcurrio el tiempo de dura el disparo de la transicion?
      */
     private boolean enVentanaTiempo(int transicion) {
-        if (System.currentTimeMillis() - timeStamp[transicion] < intervalos[transicion][0]) {
+        long diferencia = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - timeStamp[transicion]);
+        if (diferencia < intervalos[transicion][0]) {
+            sleepAmount[transicion] = intervalos[transicion][0] - diferencia;
             return false;
         }
         return true;
@@ -173,7 +180,7 @@ public class RDP {
         for (int i = 0; i < numeroTransiciones; i++) {
             if (sensibilizado[i] == 1 && desensibilizadasInhibidor[i] == 1 && temporizadas[i]) {
                 if (timeStamp[i] == 0)
-                    timeStamp[i] = System.currentTimeMillis();
+                    timeStamp[i] = System.nanoTime();
             }
         }
     }

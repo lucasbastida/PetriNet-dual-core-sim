@@ -16,6 +16,7 @@ public class Monitor {
     private Politica politica = new Politica(buffer1, buffer2, numeroTransiciones);
     private RDP rdp;
 
+
     public Monitor(LogFileManager log) throws IOException {
         this.rdp = new RDP(log, buffer1, buffer2, numeroPlazas, numeroTransiciones);
     }
@@ -27,12 +28,13 @@ public class Monitor {
         while (!rdp.disparar(transicion)) {
 
             mutex.release();
-            if (noEncolar(transicion)) {
-                return false;
+            if (transicion.esTemporizada()) {
+                System.out.println(Thread.currentThread().getName() + "\t no logro disparar " + transicion + " -> durmiendo: "+ rdp.sleepAmount[transicion.getValor()]);
+                Thread.sleep(rdp.sleepAmount[transicion.getValor()]);
+            } else {
+                System.out.println(Thread.currentThread().getName() + "\t no logro disparar " + transicion + " -> encolando");
+                colas.await(transicion);
             }
-
-            System.out.println(Thread.currentThread().getName() + "\t no logro disparar " + transicion + " -> encolando");
-            colas.await(transicion);
             mutex.acquire();
         }
 
@@ -59,12 +61,5 @@ public class Monitor {
             }
         }
         return 0;
-    }
-
-    private boolean noEncolar(Transicion transicion){
-        if(transicion == Transicion.GENERAR_TAREA || transicion == Transicion.T4 || transicion == Transicion.T10
-                || transicion == Transicion.PROCESANDO_EN_NUCLEO_1 || transicion == Transicion.PROCESANDO_EN_NUCLEO_2)
-            return  true;
-        return false;
     }
 }

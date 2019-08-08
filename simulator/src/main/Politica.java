@@ -25,16 +25,17 @@ public class Politica {
         int max = 0;
         int transicion = 0;
 
-        for (int i = 0; i < vectorSens.length; i++) {
-            if (vectorSens[i] == 1 && vectorCola[i] == 1) {
-                vectorAND[i] = 1;
+        for (Transicion t :
+                Transicion.values()) {
+            if (vectorSens[t.getValor()] == 1 && vectorCola[t.getValor()] == 1 && !t.esTemporizada()) {
+                vectorAND[t.getValor()] = 1;
             } else {
-                vectorAND[i] = 0;
+                vectorAND[t.getValor()] = 0;
             }
         }
 
         //despertar segun tamaño buffer
-        if (vectorAND[Transicion.TAREA_A_BUFFER_1.getValor()] == 1 ) {
+        if (vectorAND[Transicion.TAREA_A_BUFFER_1.getValor()] == 1) {
             if (buffer1.getEstado() > buffer2.getEstado()) {
                 return Transicion.TAREA_A_BUFFER_2.getValor();
             } else {
