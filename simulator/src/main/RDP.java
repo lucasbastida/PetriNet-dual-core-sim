@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 public class RDP {
 
-    private final int numeroPlazas = 16;
-    private final int numeroTransiciones = 15;
+    private final int numeroPlazas;
+    private final int numeroTransiciones;
 
     //n x m (plazas x transiciones)
     private int[][] incidenciaPre;
@@ -33,7 +33,9 @@ public class RDP {
     private LogFileManager log;
 
 
-    public RDP(LogFileManager log, Buffer buffer1, Buffer buffer2) throws IOException {
+    public RDP(LogFileManager log, Buffer buffer1, Buffer buffer2, int numeroPlazas, int numeroTransiciones) throws IOException {
+        this.numeroPlazas = numeroPlazas;
+        this.numeroTransiciones = numeroTransiciones;
 
         incidenciaPre = cargarMatriz("Matriz incidencia pre.txt", numeroPlazas, numeroTransiciones);
         incidenciaPos = cargarMatriz("Matriz incidencia pos.txt", numeroPlazas, numeroTransiciones);
@@ -259,7 +261,7 @@ public class RDP {
 
     @Override
     public String toString() {
-        return "RDP{" +
+        String print = "RDP{" +
                 "\n, marcadoActual=" + Arrays.toString(marcadoActual) +
                 "\n, sensibilizado=" + Arrays.toString(sensibilizado) +
                 "\n, desensibilizada por arco=" + Arrays.toString(desensibilizadasInhibidor) +
@@ -275,6 +277,14 @@ public class RDP {
                 "\n, Invariantes M(P5)+M(P7)+M(P8)=" + marcadoActual[5] + "+" + marcadoActual[7] + "+" + marcadoActual[8] + "=1" +
                 "\n, Invariantes M(P3)+M(P4)=" + marcadoActual[3] + "+" + marcadoActual[4] + "=1 " +
                 "\n}";
+
+        assert (marcadoActual[0] + marcadoActual[1] == 1) : "no se cumplio un p-invariante";
+        assert (marcadoActual[10] + marcadoActual[11] == 1) : "no se cumplio un p-invariante";
+        assert (marcadoActual[12] + marcadoActual[13] + marcadoActual[15] == 1) : "no se cumplio un p-invariante";
+        assert (marcadoActual[5] + marcadoActual[7] + marcadoActual[8] == 1) : "no se cumplio un p-invariante";
+        assert (marcadoActual[3] + marcadoActual[4] == 1) : "no se cumplio un p-invariante";
+
+        return print;
     }
 
     /*
