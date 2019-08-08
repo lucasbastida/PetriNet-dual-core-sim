@@ -18,8 +18,8 @@ public class Main {
         Transicion[] secuencia2 = {Transicion.TAREA_A_BUFFER_2};
         Transicion[] secuencia3 = {Transicion.PROCESANDO_EN_NUCLEO_1, Transicion.T4};
         Transicion[] secuencia4 = {Transicion.PROCESANDO_EN_NUCLEO_2, Transicion.T10};
-        Transicion[] secuencia5 = {Transicion.ENCENDER_CPU_1, Transicion.T6, Transicion.APAGAR_CPU_1};
-        Transicion[] secuencia6 = {Transicion.T7};
+        Transicion[] secuencia5 = {Transicion.ENCENDER_CPU_1, Transicion.T7, Transicion.APAGAR_CPU_1};
+        Transicion[] secuencia6 = {Transicion.T6};
         Transicion[] secuencia7 = {Transicion.ENCENDER_CPU_2, Transicion.T12,Transicion.APAGAR_CPU_2};
         Transicion[] secuencia8 = {Transicion.T13};
 
