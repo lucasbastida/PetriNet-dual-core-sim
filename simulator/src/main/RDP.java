@@ -33,6 +33,7 @@ public class RDP {
     private Buffer buffer1;
     private Buffer buffer2;
     private LogFileManager log;
+    private boolean pInv = true;
 
 
     public RDP(LogFileManager log, Buffer buffer1, Buffer buffer2, int numeroPlazas, int numeroTransiciones) throws IOException {
@@ -72,6 +73,7 @@ public class RDP {
         if (estaSensibilizada(transicion)) {
             //actualizar marcado
             setMarcadoActual(transicion);
+            checkPInvariant();
 
             //si se disparo una temporizada, reset a 0
             if (transicion.esTemporizada()) {
@@ -85,9 +87,13 @@ public class RDP {
             modificarBuffer(transicion);
             checkProcesados(transicion);
 
-            System.out.println("marcado: " + Arrays.toString(marcadoActual));
-            System.out.println(toString());
+            //log y print en console
             log.escribirDatos(datosArchivo(transicion.getValor()));
+            System.out.println(datosArchivo(transicion.getValor()));
+            if (!pInv){
+                throw new RuntimeException("NO SE CUMPLIO UN P INVARIANTE");
+            }
+
             return true;
         }
         return false;
@@ -106,7 +112,7 @@ public class RDP {
 
     }
 
-    public void calcularTranSens() {
+    private void calcularTranSens() {
 
         int[] vectorE = new int[numeroTransiciones];
         Arrays.fill(vectorE, 1);
@@ -126,7 +132,7 @@ public class RDP {
         sensibilizado = vectorE;
     }
 
-    public void calcularDesensibilizadasInhibidor() {
+    private void calcularDesensibilizadasInhibidor() {
         int[] vectorQ = new int[numeroPlazas];
         Arrays.fill(vectorQ, 0);
         Arrays.fill(desensibilizadasInhibidor, 0);
@@ -168,6 +174,9 @@ public class RDP {
         long diferencia = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - timeStamp[transicion]);
         if (diferencia < intervalos[transicion][0]) {
             sleepAmount[transicion] = intervalos[transicion][0] - diferencia;
+            return false;
+        }
+        if(diferencia > intervalos[transicion][1]){
             return false;
         }
         return true;
@@ -247,17 +256,29 @@ public class RDP {
         }
     }
 
-    public String datosArchivo(int transicion) {
-        return "disparo=" + transicion +
+    private String datosArchivo(int transicion) {
+        String print =
+                "disparo=" + transicion +
                 "\nmarcado=" + Arrays.toString(marcadoActual) +
                 "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
                 "\nbuffer1=" + marcadoActual[2] +
                 "\nbuffer2=" + marcadoActual[9] +
                 "\ntotalProcesadas1 =" + nucleo1 +
-                "\ntotalProcesadas2 =" + nucleo2;
+                "\ntotalProcesadas2 =" + nucleo2 +
+                "\nInvariantes M(P0)+M(P1)=" + marcadoActual[0] + "+" + marcadoActual[1] + "= 1" +
+                "\nInvariantes M(P10)+M(P11)= " + marcadoActual[10] + "+" + marcadoActual[11] + "=1" +
+                "\nInvariantes M(P12)+M(P13)+M(P15)=" + marcadoActual[12] + "+" + marcadoActual[13] + "+" + marcadoActual[15] + "=1" +
+                "\nInvariantes M(P5)+M(P7)+M(P8)=" + marcadoActual[5] + "+" + marcadoActual[7] + "+" + marcadoActual[8] + "=1" +
+                "\nInvariantes M(P3)+M(P4)=" + marcadoActual[3] + "+" + marcadoActual[4] + "=1 ";
+
+        if (!pInv){
+            print += "\nNO SE CUMPLIO UN P-INVARIANTE";
+        }
+
+        return print;
     }
 
-    public String datosArchivo() {
+    private String datosArchivo() {
         return "marcado=" + Arrays.toString(marcadoActual) +
                 "\nsensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
                 "\nbuffer1=" + marcadoActual[2] +
@@ -266,33 +287,16 @@ public class RDP {
                 "\ntotalProcesadas2 =" + nucleo2;
     }
 
-    @Override
-    public String toString() {
-        String print = "RDP{" +
-                "\n, marcadoActual=" + Arrays.toString(marcadoActual) +
-                "\n, sensibilizado=" + Arrays.toString(sensibilizado) +
-                "\n, desensibilizada por arco=" + Arrays.toString(desensibilizadasInhibidor) +
-                "\n, desensibilizada por tiempo=" + Arrays.toString(desensibilizadasTiempo) +
-                "\n, sensibilizado extendido=" + Arrays.toString(sensibilizadoExtendido) +
-                "\n, tareas en buffer 1 =" + marcadoActual[2] +
-                "\n, tareas en buffer 2 =" + marcadoActual[9] +
-                "\n, tareas finalizadas en nucleo 1 =" + nucleo1 +
-                "\n, tareas finalizadas en nucleo 2 =" + nucleo2 +
-                "\n, Invariantes M(P0)+M(P1)=" + marcadoActual[0] + "+" + marcadoActual[1] + "= 1" +
-                "\n, Invariantes M(P10)+M(P11) = " + marcadoActual[10] + "+" + marcadoActual[11] + "=1" +
-                "\n, Invariantes M(P12)+M(P13)+M(P15)=" + marcadoActual[12] + "+" + marcadoActual[13] + "+" + marcadoActual[15] + "=1" +
-                "\n, Invariantes M(P5)+M(P7)+M(P8)=" + marcadoActual[5] + "+" + marcadoActual[7] + "+" + marcadoActual[8] + "=1" +
-                "\n, Invariantes M(P3)+M(P4)=" + marcadoActual[3] + "+" + marcadoActual[4] + "=1 " +
-                "\n}";
-
-        assert (marcadoActual[0] + marcadoActual[1] == 1) : "no se cumplio un p-invariante";
-        assert (marcadoActual[10] + marcadoActual[11] == 1) : "no se cumplio un p-invariante";
-        assert (marcadoActual[12] + marcadoActual[13] + marcadoActual[15] == 1) : "no se cumplio un p-invariante";
-        assert (marcadoActual[5] + marcadoActual[7] + marcadoActual[8] == 1) : "no se cumplio un p-invariante";
-        assert (marcadoActual[3] + marcadoActual[4] == 1) : "no se cumplio un p-invariante";
-
-        return print;
+    private void checkPInvariant(){
+        if (marcadoActual[0] + marcadoActual[1] != 1
+                || marcadoActual[10] + marcadoActual[11] != 1
+                || marcadoActual[12] + marcadoActual[13] + marcadoActual[15] != 1
+                || marcadoActual[5] + marcadoActual[7] + marcadoActual[8] != 1
+                || marcadoActual[3] + marcadoActual[4] != 1){
+            pInv = false;
+        }
     }
+
 
     /*
      *   METODOS PARA CARGAR LOS ARCHIVOS

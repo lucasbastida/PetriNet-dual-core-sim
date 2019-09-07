@@ -34,8 +34,6 @@ public class Main {
         Thread disparaT7 = new Thread(new HiloAutomatico(secuencia6, monitor)); //cambiar nombre
         Thread disparaT13 = new Thread(new HiloAutomatico(secuencia8, monitor));
 
-        generadorDeTareas.setName("Generador de tareas ");
-
         generadorDeTareas.start();
         aBuffer1.start();
         aBuffer2.start();

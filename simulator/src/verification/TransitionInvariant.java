@@ -14,6 +14,7 @@ public class TransitionInvariant {
 
         LinkedList<Integer> disparos = new LinkedList<>();
         readDisparos(disparos, "log.txt");
+        int totalRemoved = 0;
 
         int tinv[][] = {{0, 10, 11, 12, 14, 2, 9},
                 {0, 10, 13, 2, 9},
@@ -44,6 +45,7 @@ public class TransitionInvariant {
 
                 //borrar 1 conjunto de disparos correspondiente a un tinv de la lista
                 if (deleteSet) {
+                    totalRemoved++;
                     for (int trans = 0; trans < ints.length; trans++) {
                         disparos.removeFirstOccurrence(ints[trans]);
                     }
@@ -56,6 +58,7 @@ public class TransitionInvariant {
                 disparos) {
             System.out.print(i + " ");
         }
+        System.out.println("Total de invariantes borrados: "+ totalRemoved);
 
     }
 
