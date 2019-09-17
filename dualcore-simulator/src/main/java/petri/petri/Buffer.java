@@ -1,4 +1,4 @@
-package main;/*
+package petri;/*
  *   main.Buffer sincronizado para log manager
  * */
 

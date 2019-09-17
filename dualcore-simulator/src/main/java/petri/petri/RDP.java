@@ -1,6 +1,8 @@
-package main;
+package petri;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +41,7 @@ public class RDP {
     public RDP(LogFileManager log, Buffer buffer1, Buffer buffer2, int numeroPlazas, int numeroTransiciones) throws IOException {
         this.numeroPlazas = numeroPlazas;
         this.numeroTransiciones = numeroTransiciones;
+
 
         incidenciaPre = cargarMatriz("Matriz incidencia pre.txt", numeroPlazas, numeroTransiciones);
         incidenciaPos = cargarMatriz("Matriz incidencia pos.txt", numeroPlazas, numeroTransiciones);
@@ -308,8 +311,8 @@ public class RDP {
 
         try {
 
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
+            InputStream in = getClass().getResourceAsStream("/"+file_name);
+            DataInputStream entrada = new DataInputStream(in);
             BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
 
             String strLinea;
@@ -333,8 +336,8 @@ public class RDP {
 
         try {
 
-            FileInputStream fstream = new FileInputStream(file_name);
-            DataInputStream entrada = new DataInputStream(fstream);
+            InputStream in = getClass().getResourceAsStream("/"+file_name);
+            DataInputStream entrada = new DataInputStream(in);
             BufferedReader buffer = new BufferedReader(new InputStreamReader(entrada));
 
             String strLinea;

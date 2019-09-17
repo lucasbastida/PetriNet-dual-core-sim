@@ -1,4 +1,4 @@
-package main;
+package petri;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

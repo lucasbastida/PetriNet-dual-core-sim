@@ -1,4 +1,4 @@
-package main;
+package petri;
 
 import java.util.concurrent.ThreadLocalRandom;
 

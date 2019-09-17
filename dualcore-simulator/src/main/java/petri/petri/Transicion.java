@@ -1,4 +1,4 @@
-package main;
+package petri;
 
 public enum Transicion {
 

@@ -1,7 +1,7 @@
 package hilo;
 
-import main.Monitor;
-import main.Transicion;
+import petri.Monitor;
+import petri.Transicion;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package main;
+package petri;
 
 import java.io.IOException;
 import java.util.concurrent.Semaphore;

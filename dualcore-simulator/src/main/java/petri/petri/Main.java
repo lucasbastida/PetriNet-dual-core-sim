@@ -1,7 +1,8 @@
-package main;
+package petri;
 
 import hilo.HiloAutomatico;
 import hilo.HiloGenerador;
+
 
 import java.io.IOException;
 
@@ -12,7 +13,7 @@ public class Main {
 
         LogFileManager log = new LogFileManager();
 
-        Monitor monitor = new Monitor(log);
+        petri.Monitor monitor = new Monitor(log);
 
         Transicion[] secuencia1 = {Transicion.TAREA_A_BUFFER_1};
         Transicion[] secuencia2 = {Transicion.TAREA_A_BUFFER_2};

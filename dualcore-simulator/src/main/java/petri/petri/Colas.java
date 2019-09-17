@@ -1,4 +1,4 @@
-package main;/*
+package petri;/*
  * CREAS CONDITIONS CON TIEMPO PARA ARRIVAL Y SERVICE RATE
  *
  * */
