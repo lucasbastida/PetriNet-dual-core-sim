@@ -28,6 +28,7 @@ public class Monitor {
         while (!rdp.disparar(transicion)) {
 
             mutex.release();
+
             if (transicion.esTemporizada()) {
                 System.out.println(Thread.currentThread().getName() + "\t no logro disparar " + transicion + " -> durmiendo: "+ rdp.sleepAmount[transicion.getValor()]);
                 Thread.sleep(rdp.sleepAmount[transicion.getValor()]);
@@ -37,6 +38,7 @@ public class Monitor {
             }
             mutex.acquire();
         }
+
 
         System.out.println(Thread.currentThread().getName() + "\t disparo " + transicion);
 

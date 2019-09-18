@@ -1,6 +1,7 @@
 package hilo;
 
 import petri.Monitor;
+import petri.ThreadStateMonitor;
 import petri.Transicion;
 
 import java.io.IOException;
@@ -30,5 +31,6 @@ public class HiloGenerador implements Runnable {
             }
 
         }
+        ThreadStateMonitor.setFinished();
     }
 }

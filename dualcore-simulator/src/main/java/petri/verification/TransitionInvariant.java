@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 
 public class TransitionInvariant {
-    public static void main(String[] args) {
+    public static void init() {
 
         LinkedList<Integer> disparos = new LinkedList<>();
         readDisparos(disparos, "log.txt");

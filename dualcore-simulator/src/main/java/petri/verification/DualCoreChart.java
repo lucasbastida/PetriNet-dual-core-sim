@@ -139,7 +139,7 @@ public class DualCoreChart extends ApplicationFrame {
 
     }
 
-    public static void main(final String[] args) {
+    public static void init() {
         final DualCoreChart demo = new DualCoreChart("Dual core results");
         demo.pack();
         RefineryUtilities.centerFrameOnScreen(demo);

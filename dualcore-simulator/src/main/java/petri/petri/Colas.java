@@ -1,7 +1,4 @@
-package petri;/*
- * CREAS CONDITIONS CON TIEMPO PARA ARRIVAL Y SERVICE RATE
- *
- * */
+package petri;
 
 import java.util.concurrent.Semaphore;
 
@@ -9,6 +6,7 @@ public class Colas {
 
     private Semaphore[] arregloSemaphores;
     private int numeroTransiciones;
+    private int queueCount = 0;
 
     public Colas(int numeroTransiciones) {
         this.numeroTransiciones = numeroTransiciones;
@@ -20,10 +18,12 @@ public class Colas {
     }
 
     public void signal(int i) {
+        ThreadStateMonitor.subtract();
         arregloSemaphores[i].release();
     }
 
     public void await(Transicion transicion) throws InterruptedException {
+        ThreadStateMonitor.add();
         arregloSemaphores[transicion.getValor()].acquire();
     }
 
