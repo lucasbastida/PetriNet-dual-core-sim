@@ -33,6 +33,7 @@
   </dependencies>
 
   <build>
+    <sourceDirectory>/src/main/java/petri</sourceDirectory>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <plugin>
